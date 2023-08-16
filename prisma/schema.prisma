@@ -6,9 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider     = "mongodb"
-  url          = env("DATABASE_URL")
-  relationMode = "prisma"
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 model Account {
@@ -17,16 +16,17 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?
-  access_token      String?
+  refresh_token     String? @db.String
+  access_token      String? @db.String
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String?
+  id_token          String? @db.String
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
@@ -35,6 +35,8 @@ model Session {
   userId       String   @db.ObjectId
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model User {
@@ -45,4 +47,38 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  Game          Game[]
+}
+
+enum GameType {
+  mcq
+  open_ended
+}
+
+model Game {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String     @db.ObjectId
+  timeStarted DateTime   @default(now())
+  topic       String
+  timeEnded   DateTime?
+  gameType    GameType
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Question    Question[]
+
+  @@index([userId], name: "userId")
+}
+
+model Question {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  question          String
+  answer            String
+  gameId            String   @db.ObjectId
+  options           Json?
+  percentageCorrect Float?
+  isCorrect         Boolean?
+  questionType      GameType
+  userAnswer        String?
+  game              Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@index([gameId], name: "gameId")
 }
