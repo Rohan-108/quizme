@@ -4,7 +4,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "./ui/card";
@@ -24,9 +23,23 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { BookOpen, CopyCheck } from "lucide-react";
 import { Separator } from "./ui/seperator";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 type Props = {};
 type Input = z.infer<typeof QuizCreationSchema>;
 const QuizCreation = (props: Props) => {
+  const router = useRouter();
+  const { mutate: getQuestions, isLoading } = useMutation({
+    mutationFn: async ({ amount, topic, type }: Input) => {
+      const response = await axios.post("/apigame", {
+        amount,
+        topic,
+        type,
+      });
+      return response.data;
+    },
+  });
   const form = useForm<Input>({
     resolver: zodResolver(QuizCreationSchema),
     defaultValues: {
@@ -36,7 +49,15 @@ const QuizCreation = (props: Props) => {
     },
   });
   const onSubmit = (input: Input) => {
-    alert(JSON.stringify(input, null, 2));
+    getQuestions(
+      { amount: input.amount, topic: input.topic, type: input.type },
+      {
+        onSuccess: ({ gameId }) => {
+          const gameType = form.getValues("type");
+          router.push(`/play/${gameType}/${gameId}`);
+        },
+      }
+    );
   };
   form.watch();
   return (
@@ -117,7 +138,9 @@ const QuizCreation = (props: Props) => {
                   Open Ended
                 </Button>
               </div>
-              <Button type="submit">Submit</Button>
+              <Button disabled={isLoading} type="submit">
+                Submit
+              </Button>
             </form>
           </Form>
         </CardContent>

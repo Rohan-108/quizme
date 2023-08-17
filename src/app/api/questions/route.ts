@@ -58,6 +58,14 @@ export const POST = async (req: Request, res: Response) => {
         error: error.issues,
         status: 400,
       });
+    } else {
+      console.error("elle gpt error", error);
+      return NextResponse.json(
+        { error: "An unexpected error occurred." },
+        {
+          status: 500,
+        }
+      );
     }
   }
 };
