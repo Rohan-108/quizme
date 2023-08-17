@@ -21,7 +21,7 @@ import { useToast } from "./ui/use-toast";
 import Link from "next/link";
 
 type Props = {
-  game: Game & { questions: Pick<Question, "id" | "question" | "answer">[] };
+  game: Game & { Question: Pick<Question, "id" | "question" | "answer">[] };
 };
 
 const OpenEnded = ({ game }: Props) => {
@@ -31,8 +31,8 @@ const OpenEnded = ({ game }: Props) => {
   const [averagePercentage, setAveragePercentage] = React.useState(0);
   ///storing to spedd the thong
   const currentQuestion = React.useMemo(() => {
-    return game.questions[questionIndex];
-  }, [questionIndex, game.questions]);
+    return game.Question[questionIndex];
+  }, [questionIndex, game.Question]);
   ///function to end the game
   const { mutate: endGame } = useMutation({
     mutationFn: async () => {
@@ -80,7 +80,7 @@ const OpenEnded = ({ game }: Props) => {
         setAveragePercentage((prev) => {
           return (prev + percentageSimilar) / (questionIndex + 1);
         });
-        if (questionIndex === game.questions.length - 1) {
+        if (questionIndex === game.Question.length - 1) {
           endGame();
           setHasEnded(true);
           return;
@@ -95,7 +95,7 @@ const OpenEnded = ({ game }: Props) => {
         });
       },
     });
-  }, [checkAnswer, questionIndex, toast, endGame, game.questions.length]);
+  }, [checkAnswer, questionIndex, toast, endGame, game.Question.length]);
   ///function to handle key press
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -151,7 +151,7 @@ const OpenEnded = ({ game }: Props) => {
           <CardTitle className="mr-5 text-center divide-y divide-zinc-600/50">
             <div>{questionIndex + 1}</div>
             <div className="text-base text-slate-400">
-              {game.questions.length}
+              {game.Question.length}
             </div>
           </CardTitle>
           <CardDescription className="flex-grow text-lg">

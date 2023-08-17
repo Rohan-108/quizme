@@ -3,16 +3,20 @@ import { getAuthSession } from "@/lib/nextauth";
 import { redirect } from "next/navigation";
 import React from "react";
 
-type Props = {};
+interface Props {
+  searchParams: {
+    topic?: string;
+  };
+}
 
-const page = async (props: Props) => {
+const page = async ({ searchParams }: Props) => {
   //   const session = await getAuthSession();
   //   if (!session?.user) {
   //     redirect("/");
   //   }
   return (
     <div>
-      <QuizCreation />
+      <QuizCreation topic={searchParams.topic ?? ""} />
     </div>
   );
 };

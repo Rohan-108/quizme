@@ -20,7 +20,7 @@ import { z } from "zod";
 import { useToast } from "./ui/use-toast";
 
 type Props = {
-  game: Game & { questions: Pick<Question, "id" | "options" | "question">[] };
+  game: Game & { Question: Pick<Question, "id" | "options" | "question">[] };
 };
 
 const MCQ = ({ game }: Props) => {
@@ -34,8 +34,8 @@ const MCQ = ({ game }: Props) => {
   const [now, setNow] = React.useState(new Date());
 
   const currentQuestion = React.useMemo(() => {
-    return game.questions[questionIndex];
-  }, [questionIndex, game.questions]);
+    return game.Question[questionIndex];
+  }, [questionIndex, game.Question]);
   ///saving options to reduce time
   const options = React.useMemo(() => {
     if (!currentQuestion) return [];
@@ -99,7 +99,7 @@ const MCQ = ({ game }: Props) => {
             variant: "destructive",
           });
         }
-        if (questionIndex === game.questions.length - 1) {
+        if (questionIndex === game.Question.length - 1) {
           endGame();
           setHasEnded(true);
           return;
@@ -114,7 +114,7 @@ const MCQ = ({ game }: Props) => {
         });
       },
     });
-  }, [checkAnswer, questionIndex, game.questions.length, toast, endGame]);
+  }, [checkAnswer, questionIndex, game.Question.length, toast, endGame]);
   ///keypress event listeners
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -184,7 +184,7 @@ const MCQ = ({ game }: Props) => {
           <CardTitle className="mr-5 text-center divide-y divide-zinc-600/50">
             <div>{questionIndex + 1}</div>
             <div className="text-base text-slate-400">
-              {game.questions.length}
+              {game.Question.length}
             </div>
           </CardTitle>
           <CardDescription className="flex-grow text-lg">

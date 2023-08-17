@@ -26,6 +26,7 @@ const OpenEndedPage = async ({ params: { gameId } }: Props) => {
           id: true,
           question: true,
           answer: true,
+          options: true,
         },
       },
     },

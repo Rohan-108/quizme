@@ -1,5 +1,6 @@
 "use client";
 import { z } from "zod";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -24,12 +25,19 @@ import { Input } from "./ui/input";
 import { BookOpen, CopyCheck } from "lucide-react";
 import { Separator } from "./ui/seperator";
 import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
+import { useToast } from "./ui/use-toast";
+import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
-type Props = {};
+import LoadingQuestions from "./loadingQuestions";
+type Props = {
+  topic: string;
+};
 type Input = z.infer<typeof QuizCreationSchema>;
-const QuizCreation = (props: Props) => {
+const QuizCreation = ({ topic: topicParam }: Props) => {
   const router = useRouter();
+  const [showLoader, setShowLoader] = useState(false);
+  const [finishedLoading, setFinishedLoading] = useState(false);
+  const { toast } = useToast();
   const { mutate: getQuestions, isLoading } = useMutation({
     mutationFn: async ({ amount, topic, type }: Input) => {
       const response = await axios.post("/apigame", {
@@ -44,22 +52,41 @@ const QuizCreation = (props: Props) => {
     resolver: zodResolver(QuizCreationSchema),
     defaultValues: {
       amount: 3,
-      topic: "",
+      topic: topicParam,
       type: "mcq",
     },
   });
-  const onSubmit = (input: Input) => {
-    getQuestions(
-      { amount: input.amount, topic: input.topic, type: input.type },
-      {
-        onSuccess: ({ gameId }) => {
-          const gameType = form.getValues("type");
-          router.push(`/play/${gameType}/${gameId}`);
-        },
-      }
-    );
+  const onSubmit = async (data: Input) => {
+    setShowLoader(true);
+    getQuestions(data, {
+      onError: (error: any) => {
+        setShowLoader(false);
+        if (error instanceof AxiosError) {
+          if (error.response?.status === 500) {
+            toast({
+              title: "Error",
+              description: "Something went wrong. Please try again later.",
+              variant: "destructive",
+            });
+          }
+        }
+      },
+      onSuccess: ({ gameId }: { gameId: string }) => {
+        setFinishedLoading(true);
+        setTimeout(() => {
+          if (form.getValues("type") === "mcq") {
+            router.push(`/play/mcq/${gameId}`);
+          } else if (form.getValues("type") === "open_ended") {
+            router.push(`/play/open-ended/${gameId}`);
+          }
+        }, 2000);
+      },
+    });
   };
   form.watch();
+  if (showLoader) {
+    return <LoadingQuestions finished={finishedLoading} />;
+  }
   return (
     <div className="absolute -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
       <Card>
