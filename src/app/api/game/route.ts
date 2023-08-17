@@ -8,10 +8,9 @@ export async function POST(req: Request, res: Response) {
   try {
     const session = await getAuthSession();
     const body = await req.json();
-    const { amount, topic, type } = QuizCreationSchema.parse(body);
+    const { amount, topic, difficulties } = QuizCreationSchema.parse(body);
     const game = await prisma.game.create({
       data: {
-        gameType: type,
         timeStarted: new Date(),
         userId: session?.user.id as string,
         topic,
@@ -34,52 +33,39 @@ export async function POST(req: Request, res: Response) {
     const { data } = await axios.post(`${process.env.URL}/api/questions`, {
       amount,
       topic,
-      type,
+      difficulties,
     });
-    if (type === "mcq") {
-      type mcqQuestion = {
-        question: string;
-        answer: string;
-        option1: string;
-        option2: string;
-        option3: string;
+    type mcqQuestion = {
+      category: string;
+      id: string;
+      correctAnswer: string;
+      incorrectAnswer: string[];
+      question: {
+        text: string;
       };
-      let manyData = data.questions.map((question: mcqQuestion) => {
-        let options = [
-          question.answer,
-          question.option1,
-          question.option2,
-          question.option3,
-        ];
-        options = options.sort(() => Math.random() - 0.5);
-        return {
-          question: question.question,
-          answer: question.answer,
-          options: JSON.stringify(options),
-          gameId: game.id,
-          questionType: "mcq",
-        };
-      });
-      await prisma.question.createMany({
-        data: manyData,
-      });
-    } else if (type === "open_ended") {
-      type openQuestion = {
-        question: string;
-        answer: string;
+      tags: string[];
+      type: string;
+      regions: [];
+      isNiche: boolean;
+    };
+    let manyData = data.map((question: mcqQuestion) => {
+      let options = [
+        question.correctAnswer,
+        question.incorrectAnswer[0],
+        question.incorrectAnswer[1],
+        question.incorrectAnswer[2],
+      ];
+      options = options.sort(() => Math.random() - 0.5);
+      return {
+        question: question.question.text,
+        answer: question.correctAnswer,
+        options: JSON.stringify(options),
+        gameId: game.id,
       };
-      let manyData = data.questions.map((question: openQuestion) => {
-        return {
-          question: question.question,
-          answer: question.answer,
-          gameId: game.id,
-          questionType: "mcq",
-        };
-      });
-      await prisma.question.createMany({
-        data: manyData,
-      });
-    }
+    });
+    await prisma.question.createMany({
+      data: manyData,
+    });
     return NextResponse.json({
       gameId: game.id,
     });

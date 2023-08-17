@@ -56,18 +56,12 @@ model User {
   Game          Game[]
 }
 
-enum GameType {
-  mcq
-  open_ended
-}
-
 model Game {
   id          String     @id @default(auto()) @map("_id") @db.ObjectId
   userId      String     @db.ObjectId
   timeStarted DateTime   @default(now())
   topic       String
   timeEnded   DateTime?
-  gameType    GameType
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   Question    Question[]
 
@@ -75,16 +69,14 @@ model Game {
 }
 
 model Question {
-  id                String   @id @default(auto()) @map("_id") @db.ObjectId
-  question          String
-  answer            String
-  gameId            String   @db.ObjectId
-  options           Json?
-  percentageCorrect Float?
-  isCorrect         Boolean?
-  questionType      GameType
-  userAnswer        String?
-  game              Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  question   String
+  answer     String
+  gameId     String   @db.ObjectId
+  options    Json?
+  isCorrect  Boolean?
+  userAnswer String?
+  game       Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
 
   @@index([gameId], name: "gameId")
 }
