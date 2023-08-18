@@ -35,6 +35,7 @@ export async function POST(req: Request, res: Response) {
       topic,
       difficulties,
     });
+    console.log(data);
     type mcqQuestion = {
       category: string;
       id: string;

@@ -24,11 +24,7 @@ const HistoryComponent = async ({ limit, userId }: Props) => {
         return (
           <div className="flex items-center justify-between" key={game.id}>
             <div className="flex items-center">
-              {game.gameType === "mcq" ? (
-                <CopyCheck className="mr-3" />
-              ) : (
-                <Edit2 className="mr-3" />
-              )}
+              <CopyCheck className="mr-3" />
               <div className="ml-4 space-y-1">
                 <Link
                   className="text-base font-medium leading-none underline"
@@ -40,9 +36,7 @@ const HistoryComponent = async ({ limit, userId }: Props) => {
                   <Clock className="w-4 h-4 mr-1" />
                   {new Date(game.timeEnded ?? 0).toLocaleDateString()}
                 </p>
-                <p className="text-sm text-muted-foreground">
-                  {game.gameType === "mcq" ? "Multiple Choice" : "Open-Ended"}
-                </p>
+                <p className="text-sm text-muted-foreground">Multiple Choice</p>
               </div>
             </div>
           </div>

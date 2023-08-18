@@ -13,9 +13,9 @@ type Props = {};
 
 const DashBoard = async (props: Props) => {
   const session = await getAuthSession();
-  // if(!session?.user){
-  //   return redirect('/');
-  // }
+  if (!session?.user) {
+    return redirect("/");
+  }
   return (
     <main className="p-8 mx-auto max-w-7xl">
       <div className="flex items-center">

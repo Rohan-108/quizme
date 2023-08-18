@@ -20,30 +20,56 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { BookOpen, CopyCheck } from "lucide-react";
+import { BookOpen, CheckIcon, CopyCheck } from "lucide-react";
 import { Separator } from "./ui/seperator";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "./ui/use-toast";
 import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import LoadingQuestions from "./loadingQuestions";
-type Props = {
-  topic: string;
-};
+import { cn } from "@/lib/utils";
+import { CaretSortIcon } from "@radix-ui/react-icons";
 type Input = z.infer<typeof QuizCreationSchema>;
+type Props = {
+  topic: Input["topic"];
+};
+const topics = [
+  { label: "Music", value: "music" },
+  { label: "Sports", value: "sport_and_leisure" },
+  { label: "Film&Tv", value: "film_and_tv" },
+  { label: "Arts", value: "arts_and_literature" },
+  { label: "History", value: "history" },
+  { label: "Culture", value: "society_and_culture" },
+  { label: "Science", value: "science" },
+  { label: "Geography", value: "geography" },
+  { label: "Food&Drink", value: "food_and_drink" },
+  { label: "General Knowledge", value: "general_knowledge" },
+] as const;
 const QuizCreation = ({ topic: topicParam }: Props) => {
   const router = useRouter();
   const [showLoader, setShowLoader] = useState(false);
   const [finishedLoading, setFinishedLoading] = useState(false);
   const { toast } = useToast();
   const { mutate: getQuestions, isLoading } = useMutation({
-    mutationFn: async ({ amount, topic, type }: Input) => {
-      const response = await axios.post("/apigame", {
+    mutationFn: async ({ amount, topic, difficulties }: Input) => {
+      const response = await axios.post("/api/game", {
         amount,
         topic,
-        type,
+        difficulties,
       });
       return response.data;
     },
@@ -53,7 +79,7 @@ const QuizCreation = ({ topic: topicParam }: Props) => {
     defaultValues: {
       amount: 3,
       topic: topicParam,
-      type: "mcq",
+      difficulties: "medium",
     },
   });
   const onSubmit = async (data: Input) => {
@@ -74,11 +100,7 @@ const QuizCreation = ({ topic: topicParam }: Props) => {
       onSuccess: ({ gameId }: { gameId: string }) => {
         setFinishedLoading(true);
         setTimeout(() => {
-          if (form.getValues("type") === "mcq") {
-            router.push(`/play/mcq/${gameId}`);
-          } else if (form.getValues("type") === "open_ended") {
-            router.push(`/play/open-ended/${gameId}`);
-          }
+          router.push(`/play/mcq/${gameId}`);
         }, 2000);
       },
     });
@@ -101,12 +123,61 @@ const QuizCreation = ({ topic: topicParam }: Props) => {
                 control={form.control}
                 name="topic"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col">
                     <FormLabel>Topic</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter the topic" {...field} />
-                    </FormControl>
-                    <FormDescription>Please provide a topic...</FormDescription>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className={cn(
+                              "w-[200px] justify-between",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value
+                              ? topics.find((t) => t.value === field.value)
+                                  ?.label
+                              : "Select Topic"}
+                            <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[200px] p-0">
+                        <Command>
+                          <CommandInput
+                            placeholder="Select Topic..."
+                            className="h-9"
+                          />
+                          <CommandEmpty>No topic found.</CommandEmpty>
+                          <CommandGroup>
+                            {topics.map((t) => (
+                              <CommandItem
+                                value={t.label}
+                                key={t.value}
+                                onSelect={() => {
+                                  form.setValue("topic", t.value);
+                                }}
+                              >
+                                {t.label}
+                                <CheckIcon
+                                  className={cn(
+                                    "ml-auto h-4 w-4",
+                                    t.value === field.value
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    <FormDescription>
+                      This topic will be used to generate quiz.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -139,30 +210,48 @@ const QuizCreation = ({ topic: topicParam }: Props) => {
                   type="button"
                   className="w-1/2 rounded-none rounded-l-lg"
                   variant={
-                    form.getValues("type") === "mcq" ? "default" : "secondary"
+                    form.getValues("difficulties") === "easy"
+                      ? "default"
+                      : "secondary"
                   }
                   onClick={() => {
-                    form.setValue("type", "mcq");
+                    form.setValue("difficulties", "easy");
                   }}
                 >
                   <CopyCheck className="w-4 h-4 mr-2" />
-                  Multiple Choice
+                  Easy
                 </Button>
                 <Separator orientation="vertical" />
                 <Button
                   type="button"
                   className="w-1/2 rounded-none rounded-r-lg"
                   variant={
-                    form.getValues("type") === "open_ended"
+                    form.getValues("difficulties") === "medium"
                       ? "default"
                       : "secondary"
                   }
                   onClick={() => {
-                    form.setValue("type", "open_ended");
+                    form.setValue("difficulties", "medium");
                   }}
                 >
                   <BookOpen className="w-4 h-4 mr-2" />
-                  Open Ended
+                  Medium
+                </Button>
+                <Separator orientation="vertical" />
+                <Button
+                  type="button"
+                  className="w-1/2 rounded-none rounded-l-lg"
+                  variant={
+                    form.getValues("difficulties") === "hard"
+                      ? "default"
+                      : "secondary"
+                  }
+                  onClick={() => {
+                    form.setValue("difficulties", "hard");
+                  }}
+                >
+                  <CopyCheck className="w-4 h-4 mr-2" />
+                  Hard
                 </Button>
               </div>
               <Button disabled={isLoading} type="submit">
