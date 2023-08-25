@@ -17,6 +17,7 @@ export const POST = async (req: Request, res: Response) => {
         },
       }
     );
+    // const dataTobereturned = questions.questions;
     return NextResponse.json(
       {
         questions,

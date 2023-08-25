@@ -5,6 +5,7 @@ import QuizMeCard from "@/components/dashboard/QuizMeCard";
 import RecentActivityCard from "@/components/dashboard/RecentActivityCard";
 import { getAuthSession } from "@/lib/nextauth";
 import { redirect } from "next/navigation";
+import axios from "axios";
 export const metadata = {
   title: "Dashboard | Quizmify",
   description: "Quiz yourself on anything!",

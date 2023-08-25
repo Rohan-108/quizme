@@ -2,7 +2,6 @@ import { checkAnswerSchema } from "@/schemas/form/quiz";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { prisma } from "../../../lib/db";
-import { compareTwoStrings } from "string-similarity";
 export async function POST(req: Request, res: Response) {
   try {
     const body = await req.json();

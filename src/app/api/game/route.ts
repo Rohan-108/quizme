@@ -4,6 +4,7 @@ import { getAuthSession } from "@/lib/nextauth";
 import axios from "axios";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
+import { quizQuestion } from "@/schemas/apiType/types";
 export async function POST(req: Request, res: Response) {
   try {
     const session = await getAuthSession();
@@ -30,42 +31,31 @@ export async function POST(req: Request, res: Response) {
         },
       },
     });
-    const { data } = await axios.post(`${process.env.URL}/api/questions`, {
-      amount,
-      topic,
-      difficulties,
-    });
-    console.log(data);
-    type mcqQuestion = {
-      category: string;
-      id: string;
-      correctAnswer: string;
-      incorrectAnswer: string[];
-      question: {
-        text: string;
-      };
-      tags: string[];
-      type: string;
-      regions: [];
-      isNiche: boolean;
-    };
-    let manyData = data.map((question: mcqQuestion) => {
-      let options = [
-        question.correctAnswer,
-        question.incorrectAnswer[0],
-        question.incorrectAnswer[1],
-        question.incorrectAnswer[2],
-      ];
-      options = options.sort(() => Math.random() - 0.5);
+    const { data: q } = await axios.post(
+      `${process.env.NEXTAUTH_URL}/api/questions`,
+      {
+        amount,
+        topic,
+        difficulties,
+      }
+    );
+    const quizData = q.questions.map((quiz: quizQuestion) => {
+      let options = quiz.incorrectAnswers;
+      options.splice(
+        Math.floor(Math.random() * (quiz.incorrectAnswers.length + 1)),
+        0,
+        quiz.correctAnswer
+      );
       return {
-        question: question.question.text,
-        answer: question.correctAnswer,
+        question: quiz.question.text,
+        answer: quiz.correctAnswer,
         options: JSON.stringify(options),
         gameId: game.id,
       };
     });
+    console.log(quizData);
     await prisma.question.createMany({
-      data: manyData,
+      data: quizData,
     });
     return NextResponse.json({
       gameId: game.id,
