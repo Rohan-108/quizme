@@ -55,7 +55,7 @@ const ResultsCard = ({ accuracy, gameId }: Props) => {
         <CardTitle className="text-2xl font-bold">Results</CardTitle>
         <Award />
       </CardHeader>
-      <CardContent className="flex flex-col items-center justify-center h-3/5">
+      <CardContent className="flex flex-col items-center justify-center h-3/5 gap-4">
         {accuracy > 75 ? (
           <>
             <Trophy className="mr-4" stroke="gold" size={50} />
@@ -87,8 +87,6 @@ const ResultsCard = ({ accuracy, gameId }: Props) => {
             </div>
           </>
         )}
-      </CardContent>
-      <CardContent className="flex flex-col items-center justify-center h-3/5 mt-4">
         <Button onClick={() => onSubmit(gameId)}>Play Again</Button>
       </CardContent>
     </Card>
