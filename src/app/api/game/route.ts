@@ -40,7 +40,7 @@ export async function POST(req: Request, res: Response) {
       }
     );
     const quizData = q.questions.map((quiz: quizQuestion) => {
-      let options = quiz.incorrectAnswers;
+      const options = quiz.incorrectAnswers;
       options.splice(
         Math.floor(Math.random() * (quiz.incorrectAnswers.length + 1)),
         0,
@@ -49,7 +49,7 @@ export async function POST(req: Request, res: Response) {
       return {
         question: quiz.question.text,
         answer: quiz.correctAnswer,
-        options: JSON.stringify(options),
+        options: options,
         gameId: game.id,
       };
     });

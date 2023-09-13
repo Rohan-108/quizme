@@ -88,7 +88,7 @@ const ResultsCard = ({ accuracy, gameId }: Props) => {
           </>
         )}
       </CardContent>
-      <CardContent>
+      <CardContent className="flex flex-col items-center justify-center h-3/5 mt-4">
         <Button onClick={() => onSubmit(gameId)}>Play Again</Button>
       </CardContent>
     </Card>

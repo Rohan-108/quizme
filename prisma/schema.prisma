@@ -82,7 +82,7 @@ model Question {
   question   String
   answer     String
   gameId     String   @db.ObjectId
-  options    Json?
+  options    String[]
   isCorrect  Boolean?
   userAnswer String?
   game       Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
