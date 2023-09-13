@@ -53,7 +53,6 @@ export async function POST(req: Request, res: Response) {
         gameId: game.id,
       };
     });
-    console.log(quizData);
     await prisma.question.createMany({
       data: quizData,
     });

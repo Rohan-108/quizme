@@ -1,10 +1,54 @@
-import React from "react";
-
+"use client";
+import { useMutation } from "@tanstack/react-query";
+import axios, { AxiosError } from "axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Award, Trophy } from "lucide-react";
-type Props = { accuracy: number };
+import LoadingQuestions from "@/components/loadingQuestions";
+import { useState } from "react";
+import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
+import { useToast } from "../ui/use-toast";
+type Props = { accuracy: number; gameId: string };
 
-const ResultsCard = ({ accuracy }: Props) => {
+const ResultsCard = ({ accuracy, gameId }: Props) => {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [showLoader, setShowLoader] = useState(false);
+  const [finishedLoading, setFinishedLoading] = useState(false);
+  const { mutate: playAgain, isLoading } = useMutation({
+    mutationFn: async (gameId: string) => {
+      const response = await axios.post("/api/replay", {
+        gameId: gameId,
+      });
+      return response.data;
+    },
+  });
+  const onSubmit = async (gameId: string) => {
+    setShowLoader(true);
+    playAgain(gameId, {
+      onError: (error: any) => {
+        setShowLoader(false);
+        if (error instanceof AxiosError) {
+          if (error.response?.status === 500) {
+            toast({
+              title: "Error",
+              description: "Something went wrong. Please try again later.",
+              variant: "destructive",
+            });
+          }
+        }
+      },
+      onSuccess: ({ gameId }: { gameId: string }) => {
+        setFinishedLoading(true);
+        setTimeout(() => {
+          router.push(`/play/mcq/${gameId}`);
+        }, 2000);
+      },
+    });
+  };
+  if (showLoader) {
+    return <LoadingQuestions finished={finishedLoading} />;
+  }
   return (
     <Card className="md:col-span-7">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
@@ -43,6 +87,9 @@ const ResultsCard = ({ accuracy }: Props) => {
             </div>
           </>
         )}
+      </CardContent>
+      <CardContent>
+        <Button onClick={() => onSubmit(gameId)}>Play Again</Button>
       </CardContent>
     </Card>
   );

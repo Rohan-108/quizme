@@ -3,9 +3,7 @@ import { prisma } from "@/lib/db";
 import { getAuthSession } from "@/lib/nextauth";
 import { LucideLayoutDashboard } from "lucide-react";
 import Link from "next/link";
-
 import { redirect } from "next/navigation";
-import React from "react";
 import ResultsCard from "@/components/statistics/ResultsCard";
 import AccuracyCard from "@/components/statistics/AccuracyCard";
 import TimeTakenCard from "@/components/statistics/TimeTakenCard";
@@ -53,7 +51,7 @@ const Statistics = async ({ params: { gameId } }: Props) => {
         </div>
 
         <div className="grid gap-4 mt-4 md:grid-cols-7">
-          <ResultsCard accuracy={accuracy} />
+          <ResultsCard accuracy={accuracy} gameId={gameId} />
           <AccuracyCard accuracy={accuracy} />
           <TimeTakenCard
             timeEnded={new Date(game.timeEnded ?? 0)}
