@@ -1,33 +1,29 @@
+/* eslint-disable @next/next/no-img-element */
 import SignInButton from "@/components/SignInButton";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { getAuthSession } from "@/lib/nextauth";
-
+import "./homepage.css";
 export default async function Home() {
   const session = await getAuthSession();
   if (session?.user) {
     redirect("/dashboard");
   }
   return (
-    <div className="absolute -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
-      <Card className="w-[300px]">
-        <CardHeader>
-          <CardTitle>Welcome to Quizmify 🔥!</CardTitle>
-          <CardDescription>
-            Quizmify is a platform for creating quizzes using AI!. Get started
-            by loggin in below!
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <SignInButton text="Sign In with Google" />
-        </CardContent>
-      </Card>
-    </div>
+    <main className="main">
+      <section className="section banner banner-section">
+        <div className="container banner-column">
+          <img className="banner-image" src={"/loading.gif"} alt="banner" />
+          <div className="banner-inner">
+            <h1 className="heading-xl">Spend Time By Playing Quizzes</h1>
+            <p className="paragraph">
+              Enjoy playing quizzes of different categories, your progress will
+              be saved, so you can always come back to play more.
+            </p>
+            <SignInButton text="Get Started" />
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }

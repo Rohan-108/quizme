@@ -67,13 +67,3 @@
         --ring: 215 27.9% 16.9%;
     }
 }
-
-/* @layer base {
-    * {
-        @apply border-border;
-    }
-
-    body {
-        @apply bg-background text-foreground;
-    }
-} */
